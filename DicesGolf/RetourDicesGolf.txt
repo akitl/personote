@@ -1,0 +1,13 @@
+Retour dices golf 
+
+
+Dans le menu des terrain les terrain doivent pas étre lcassé par cout mais par dificulté même si quand on debloque un terrain il coute 0 il doit étre tout en bas puisque c'est le nouvaux terrain le plus dur qu'on debloque
+
+Je ne comprend pas pourquoi quand on est sur l'arbre de comaptéance les gold sont gagné beaucoup plus vite ?
+
+Quand on rate un jet de dés mais pas trop loin du score a atteindre ce serait mieux qu'on arrive un peut avant la zone cible mais par contre pas alligné comme si il y avais eu un décalage 
+
+Le système de dés c'est bien mieux qu'avant je me retrouve globalement a changé de dés pour l'approche mais globalement j'utilise toujour principalement le d6 pour faire de la précision (ce qui est super) puis le plus gros dés disponible pour le reste, la raison principal est que par exemple en mode enfer utiliseer le d10 c'est jamais bien car certe un peut plus loin que le d6 et plus précis que le d30 mais le chance de réussite a cause du seuille de difficulté sont telle que au final il faut toujour faire 10 donc presque un critique pour réussire , je n'ai pas la solution encore a cette équilibrage, même si le jeu est déjà bien plus fun maintenant
+
+pour le mode enfer infini c'est bien mais globalement j'ai fait 3 troue d'affilié c'est amusant mais je vois bien que c'est tout le temps la même chose pas vraiment de difference avec juste acheter un terrain infernal et le joueur , pour le mode infini j'avais bien plus imaginé quelque chose qui change beaucoup par exemple un terrain avec un définilement "infinie" vers la gauche et le but est d'aller le plus loin possible 
+

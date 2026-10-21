@@ -1,0 +1,3 @@
+- [Stop only own Godot processes](stop-only-own-godot-processes.md) — user runs Godot 4.7.2 editor + GUT; kill only my 4.5.1 runs by signature/PID
+- [Project state handoff](project-state-handoff.md) — état au 21/10 : commits, livrables Steam/vidéos hors dépôt, binaires plugin non commités, points ouverts
+- [Dices Golf scope decisions](dices-golf-scope-decisions.md) — full scope to infernal, gen+solver courses, v0.2 visitors, branch feat/v02-core
