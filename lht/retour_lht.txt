@@ -1,0 +1,23 @@
+Les nouvaux décors sur la map c'est bien ça habille un peut mais je pense qu'il faut ajouter plus d'arbre encore pour densifié la foret autour de la zonne de pose de tour 
+
+Le titan mondial est mieux , mais il est un peut trop grand je parle du model 3d peutétre le baisser de 20% , pour ce qui ai de ça vie j'aen ai encore eu un qui avais 18 k pv etablisont une régle un titan mondial a minimum 500 k pv et on va potentielement le monté a plus encore car il y auras probablement des joueur qui arriverons a terme a faire trop de degat pour 500 k point de vie soit sufissant 
+
+Retour sur le panel "titan mondial" au quelle on accéde en cliquant sur le bouton titan mondial , il faut retirer le texte descriptif du tout debut et juste faire une message plus simple du style " Le titan mondial passe de vallée en avallé qui réussira a lui porté le coup fatal ? "  
+ensuite plustot quafficher en texte point de vie puis un x /x qui en plus ce retrouve sur 2 ligne directement mettre une bar de vie , l'information eta actif est totalement superflux , de maniére général pour le reste du panel organiser les information de façon plus etétique et ergonomique en grille et en colone des information peuvent aussi étre deplié pour en voir le detaille plustot que tout afficher de base  en particulier la liste des dernier titans abatu qui elle devrais plustot figurer dans le temple des titans 
+
+Le panel de la quete principal a besoin de même retour d'ergonomie que celui de titan mondial 
+
+
+quand un titan est en passage il faudrais pouvoir voir au survol la zone de porté des tourelle cella est plus agréable pour le joueur pour ce projeter dans l'effet des tours 
+
+
+dans le village le batiment de l'architecte est le même que celui de la guild as très peut de chose prés il faut faire une nouvelle asset pour ce batiment 
+
+Quand on scroll dans les menu et que on arrive en buté (haut ou bas) des scroll bar on ce retrouve a zoom ou dé zoomer avec la caméra , quand on scrolle dans un menu ça ne zoom ou dézoom pas la caméra jamais 
+
+je vois dans les propriété d'une tour "Change élémentaire" ça ne veux rien dire en français
+
+Dans le menu coup fatal quand on as achevé un titan mettre les récompéance sans le detaille en grille en dessou des information du passage du titan et on peut cliqué sur les récompance pour voir un panel avec le detaille 
+
+pour rappeler lht 1.0 ce serait bien que dans le menu d'option on puisent avoir un choix de skin d'interface si possible avec des couleur pastel 
+
