@@ -1,0 +1,2 @@
+- [Deploy via git, never scp](deploy-via-git-never-scp.md) — test-server deploys wanted, via git push only; settings.json may still block
+- [tipforgood lht2v1 deploy](tipforgood-lht2v1-deploy.md) — ssh port 2222, ~/apps/lht2, compose service server, push v1 then pull + rebuild
