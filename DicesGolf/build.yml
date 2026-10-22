@@ -1,0 +1,286 @@
+name: Build And Publish
+
+on:
+  workflow_dispatch:
+    inputs:
+      publish_demo:
+        description: "Include demo"
+        required: false
+        type: boolean
+      publish_demo_only:
+        description: "Demo only"
+        required: false
+        type: boolean
+
+jobs:
+  builds:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4
+      - name: Update apt
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y software-properties-common
+          sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+          sudo apt-get update
+          sudo apt-get install -y libstdc++6 g++-11
+          uname -a
+      - name: Install Godot
+        run: |
+          curl -LO https://github.com/godotengine/godot/releases/download/4.7.2-stable/Godot_v4.7.2-stable_linux.x86_64.zip
+          unzip Godot_v4.7.2-stable_linux.x86_64.zip
+          if [ ! -f ~/.local/share/godot/export_templates/4.7.2.stable/version.txt ]; then
+          echo "~/.local/share/godot/export_templates/4.7.2.stable folder does not exist"
+          rm -R ~/.local/share/godot/export_templates/4.7.2.stable || true
+          mkdir -p ~/.local/share/godot/export_templates
+          curl -LO https://github.com/godotengine/godot/releases/download/4.7.2-stable/Godot_v4.7.2-stable_export_templates.tpz
+          unzip Godot_v4.7.2-stable_export_templates.tpz
+          mv templates ~/.local/share/godot/export_templates/4.7.2.stable
+          fi
+          mkdir builds
+          rm Godot_v4.7.2-stable_linux.x86_64.zip
+      - name: Build Linux
+        run: |
+          ls -l ~/.local/share/godot/export_templates/4.7.2.stable
+          mkdir ./builds/linux
+          ./Godot_v4.7.2-stable_linux.x86_64 --headless --export-release "Linux" ./builds/linux/Carnaval_marbles_proto.x86_64
+          tar -czvf ./builds/builds-${GITHUB_RUN_ID}-linux.tar.gz ./builds/linux
+          rm -Rf ./builds/linux
+      - name: Build Windows
+        run: |
+          ls -l ~/.local/share/godot/export_templates/4.7.2.stable
+          mkdir ./builds/windaube
+          ./Godot_v4.7.2-stable_linux.x86_64 --headless --export-release "Windows Desktop" ./builds/windaube/Carnaval_marbles_proto.exe
+          tar -czvf ./builds/builds-${GITHUB_RUN_ID}-windaube.tar.gz ./builds/windaube
+          rm -Rf ./builds/windaube
+      - name: Build macOS
+        run: |
+          mkdir ./builds/macos
+          ./Godot_v4.7.2-stable_linux.x86_64 --headless --export-release "macOS" ./builds/macos/CarnavalMarbles.app
+          tar -czvf ./builds/builds-${GITHUB_RUN_ID}-macos.tar.gz ./builds/macos
+          rm -Rf ./builds/macos
+      - uses: ryand56/r2-upload-action@latest
+        with:
+          r2-account-id: ${{ secrets.R2_ACCOUNT_ID }}
+          r2-access-key-id: ${{ secrets.R2_ACCESS_KEY_ID }}
+          r2-secret-access-key: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          r2-bucket: ${{ secrets.R2_BUCKET }}
+          source-dir: ./builds
+          destination-dir: ./touching_balls
+      #- uses: actions/upload-artifact@v4
+      #  with:
+      #    name: builds
+      #    path: ./builds
+      #    retention-days: 1
+
+  sign-macos-build:
+    runs-on: macos-15
+    needs: builds
+    steps:
+      #- name: Download a single artifact
+      #  uses: actions/download-artifact@v4
+      #  with:
+      #    name: builds
+      - name: List
+        run: |
+          export CLOUDFLARE_API_TOKEN=${{ secrets.CLOUDFLARE_API_TOKEN }}
+          npx wrangler r2 object get --remote github-artifacts/touching_balls/builds-${GITHUB_RUN_ID}-macos.tar.gz
+          mv touching_balls/builds-${GITHUB_RUN_ID}-macos.tar.gz .
+          ls -l
+          tar -xzvf builds-${GITHUB_RUN_ID}-macos.tar.gz
+          mv builds/macos .
+          ls -l
+      - name: Import Apple certificate
+        env:
+          MACOS_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE }}
+          MACOS_CERTIFICATE_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
+        run: |
+          echo "$MACOS_CERTIFICATE" | base64 --decode > certificate.p12
+          sha256sum certificate.p12
+          security create-keychain -p "" build.keychain
+          security default-keychain -s build.keychain
+          security unlock-keychain -p "" build.keychain
+          security import certificate.p12 -k build.keychain -P "$MACOS_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple: -s -k "" build.keychain
+          security list-keychains
+          security find-certificate -Z
+      - name: Code sign all frameworks and app
+        env:
+          MACOS_CERTIFICATE_NAME: ${{ secrets.MACOS_CERTIFICATE_NAME }}
+        run: |
+          CODESIGN_IDENTITY="$MACOS_CERTIFICATE_NAME"
+          APP="macos/CarnavalMarbles.app"
+
+          cat > entitlements.plist <<'EOF'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "https://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>com.apple.security.cs.disable-library-validation</key>
+            <true/>
+            <key>com.apple.security.cs.allow-dyld-environment-variables</key>
+            <true/>
+          </dict>
+          </plist>
+          EOF
+
+          plutil -lint entitlements.plist
+          ls -l "$APP/Contents/Frameworks"
+          # Signe les dylibs/frameworks individuellement
+          codesign --force --timestamp --options runtime --sign "$CODESIGN_IDENTITY" "$APP/Contents/Frameworks/libsteam_api.dylib"
+          codesign --force --timestamp --options runtime --deep --sign "$CODESIGN_IDENTITY" "$APP/Contents/Frameworks/libgodotsteam.macos.template_release.framework"
+          #codesign --force --timestamp --options runtime --sign "$CODESIGN_IDENTITY" macos/CarnavalMarbles.app/Contents/Frameworks/libgodotsteam.macos.template_debug.framework/libsteam_api.dylib
+          #codesign --force --timestamp --options runtime --sign "$CODESIGN_IDENTITY" macos/CarnavalMarbles.app/Contents/Frameworks/libgodotsteam.macos.template_debug.framework/libgodotsteam.macos.template_debug
+          #codesign --force --timestamp --options runtime --sign "$CODESIGN_IDENTITY" macos/CarnavalMarbles.app/Contents/Frameworks/libgodotsteam.macos.template_debug.framework
+          # La signature finale porte les droits requis pour charger Steam.
+          codesign --force --timestamp --options runtime --entitlements entitlements.plist --sign "$CODESIGN_IDENTITY" "$APP"
+      - name: Verify code signature
+        run: |
+          codesign --verify --deep --strict --verbose=2 macos/CarnavalMarbles.app
+          codesign -d --entitlements :- macos/CarnavalMarbles.app
+          codesign -d --entitlements :- macos/CarnavalMarbles.app 2>&1 | grep -q "com.apple.security.cs.disable-library-validation"
+      - name: Create zip for notarization
+        run: |
+          zip -r CarnavalMarbles.zip macos/CarnavalMarbles.app
+      - name: Notarize the app with Apple
+        env:
+          NOTARYTOOL_KEY: ${{ secrets.NOTARYTOOL_KEY }} # contenu du fichier .p8
+          NOTARYTOOL_KEY_ID: ${{ secrets.NOTARYTOOL_KEY_ID }}
+          NOTARYTOOL_ISSUER_ID: ${{ secrets.NOTARYTOOL_ISSUER_ID }}
+        run: |
+          echo "$NOTARYTOOL_KEY" > AuthKey.p8
+          xcrun notarytool submit CarnavalMarbles.zip \
+            --key AuthKey.p8 \
+            --key-id "$NOTARYTOOL_KEY_ID" \
+            --issuer "$NOTARYTOOL_ISSUER_ID" \
+            #--wait
+      - name: Create zip for notarization
+        run: |
+          rm CarnavalMarbles.zip
+          rm -Rf builds/
+          mkdir builds/
+          mv macos/ builds/
+          tar -czvf ./builds-${GITHUB_RUN_ID}-macos.tar.gz ./builds
+          mv ./builds-${GITHUB_RUN_ID}-macos.tar.gz ./builds
+          rm -Rf builds/macos
+      - uses: ryand56/r2-upload-action@latest
+        with:
+          r2-account-id: ${{ secrets.R2_ACCOUNT_ID }}
+          r2-access-key-id: ${{ secrets.R2_ACCESS_KEY_ID }}
+          r2-secret-access-key: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          r2-bucket: ${{ secrets.R2_BUCKET }}
+          source-dir: ./builds
+          destination-dir: ./touching_balls
+      #- uses: actions/upload-artifact@v4
+      #  with:
+      #    name: signed_macos_build
+      #    path: ./macos/CarnavalMarbles.app
+      #    retention-days: 1
+
+  upload-to-steam:
+    runs-on: ubuntu-latest
+    if: "!inputs.publish_demo_only"
+    needs: sign-macos-build
+    steps:
+      - name: Download builds
+        run: |
+          export CLOUDFLARE_API_TOKEN=${{ secrets.CLOUDFLARE_API_TOKEN }}
+          npx wrangler r2 object get --remote github-artifacts/touching_balls/builds-${GITHUB_RUN_ID}-linux.tar.gz
+          mv touching_balls/builds-${GITHUB_RUN_ID}-linux.tar.gz .
+          npx wrangler r2 object get --remote github-artifacts/touching_balls/builds-${GITHUB_RUN_ID}-windaube.tar.gz
+          mv touching_balls/builds-${GITHUB_RUN_ID}-windaube.tar.gz .
+          npx wrangler r2 object get --remote github-artifacts/touching_balls/builds-${GITHUB_RUN_ID}-macos.tar.gz
+          mv touching_balls/builds-${GITHUB_RUN_ID}-macos.tar.gz .
+          tar -xzvf builds-${GITHUB_RUN_ID}-linux.tar.gz
+          tar -xzvf builds-${GITHUB_RUN_ID}-windaube.tar.gz
+          tar -xzvf builds-${GITHUB_RUN_ID}-macos.tar.gz
+      - name: Deploy with steamcmd
+        uses: game-ci/steam-deploy@v3
+        with:
+          username: ${{ secrets.STEAM_LOGIN }}
+          configVdf: ${{ secrets.STEAM_CONFIG_VDF }}
+          appId: 3287950
+          buildDescription: ${{ github.event.head_commit.message }}
+          rootPath: builds
+          depot1Path: windaube
+          depot2Path: linux
+          depot3Path: macos
+          releaseBranch: automated_build
+
+  upload-to-steam-playtest:
+    runs-on: ubuntu-latest
+    if: "!inputs.publish_demo_only"
+    needs: sign-macos-build
+    steps:
+      - name: Download builds
+        run: |
+          export CLOUDFLARE_API_TOKEN=${{ secrets.CLOUDFLARE_API_TOKEN }}
+          npx wrangler r2 object get --remote github-artifacts/touching_balls/builds-${GITHUB_RUN_ID}-linux.tar.gz
+          mv touching_balls/builds-${GITHUB_RUN_ID}-linux.tar.gz .
+          npx wrangler r2 object get --remote github-artifacts/touching_balls/builds-${GITHUB_RUN_ID}-windaube.tar.gz
+          mv touching_balls/builds-${GITHUB_RUN_ID}-windaube.tar.gz .
+          npx wrangler r2 object get --remote github-artifacts/touching_balls/builds-${GITHUB_RUN_ID}-macos.tar.gz
+          mv touching_balls/builds-${GITHUB_RUN_ID}-macos.tar.gz .
+          tar -xzvf builds-${GITHUB_RUN_ID}-linux.tar.gz
+          tar -xzvf builds-${GITHUB_RUN_ID}-windaube.tar.gz
+          tar -xzvf builds-${GITHUB_RUN_ID}-macos.tar.gz
+      - name: Deploy PLAYTEST with steamcmd
+        uses: game-ci/steam-deploy@v3
+        with:
+          username: ${{ secrets.STEAM_LOGIN }}
+          configVdf: ${{ secrets.STEAM_CONFIG_VDF }}
+          appId: 3979050
+          buildDescription: ${{ github.event.head_commit.message }}
+          rootPath: builds
+          depot1Path: windaube
+          depot2Path: linux
+          depot3Path: macos
+          releaseBranch: default
+
+  upload-to-steam-demo:
+    runs-on: ubuntu-latest
+    if: "inputs.publish_demo || inputs.publish_demo_only"
+    needs: sign-macos-build
+    steps:
+      - name: Download builds
+        run: |
+          export CLOUDFLARE_API_TOKEN=${{ secrets.CLOUDFLARE_API_TOKEN }}
+          npx wrangler r2 object get --remote github-artifacts/touching_balls/builds-${GITHUB_RUN_ID}-linux.tar.gz
+          mv touching_balls/builds-${GITHUB_RUN_ID}-linux.tar.gz .
+          npx wrangler r2 object get --remote github-artifacts/touching_balls/builds-${GITHUB_RUN_ID}-windaube.tar.gz
+          mv touching_balls/builds-${GITHUB_RUN_ID}-windaube.tar.gz .
+          npx wrangler r2 object get --remote github-artifacts/touching_balls/builds-${GITHUB_RUN_ID}-macos.tar.gz
+          mv touching_balls/builds-${GITHUB_RUN_ID}-macos.tar.gz .
+          tar -xzvf builds-${GITHUB_RUN_ID}-linux.tar.gz
+          tar -xzvf builds-${GITHUB_RUN_ID}-windaube.tar.gz
+          tar -xzvf builds-${GITHUB_RUN_ID}-macos.tar.gz
+      - name: Deploy PLAYTEST with steamcmd
+        uses: game-ci/steam-deploy@v3
+        with:
+          username: ${{ secrets.STEAM_LOGIN }}
+          configVdf: ${{ secrets.STEAM_CONFIG_VDF }}
+          appId: 4043940
+          buildDescription: ${{ github.event.head_commit.message }}
+          rootPath: builds
+          depot1Path: windaube
+          depot2Path: linux
+          depot3Path: macos
+          releaseBranch: default
+
+  cleanup-r2:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    if: ${{ always() && !cancelled() }}
+    needs:
+      - upload-to-steam-playtest
+      - upload-to-steam-demo
+      - upload-to-steam
+    steps:
+      - name: Cleanup
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          npx wrangler r2 object delete --remote github-artifacts/touching_balls/builds-${GITHUB_RUN_ID}-linux.tar.gz
+          npx wrangler r2 object delete --remote github-artifacts/touching_balls/builds-${GITHUB_RUN_ID}-windaube.tar.gz
+          npx wrangler r2 object delete --remote github-artifacts/touching_balls/builds-${GITHUB_RUN_ID}-macos.tar.gz

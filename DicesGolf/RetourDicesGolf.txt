@@ -1,13 +1,12 @@
-Retour dices golf 
+ok j'ai pue jouer a la nouvelle version du monde infini et c'est bien
+mais la dificulter est trop faible , voila ce que je propose, deja pour regager tout ces coup il faut attendire le drapaux de la zone pas juste passer a la zone suivante parcque si non on peut juste aller tout droit et globalement indéfiniement
+
+ensuite il faudrais que tout les 5 palier la difficulter augement peutétre plus de sable ou d'eau je ne sais pas trop , ce n'est pas grave si certaine génération sont pratiquement impossible c'est un mode infini c'est deja du bonus par raport au jeu 
 
 
-Dans le menu des terrain les terrain doivent pas étre lcassé par cout mais par dificulté même si quand on debloque un terrain il coute 0 il doit étre tout en bas puisque c'est le nouvaux terrain le plus dur qu'on debloque
+autre sujet a propos de steam pour les achievement il faut que tu me génére les fichie de traduction qui contien les 2 langue voila un exemple de fichie steam utilisé pour une autre jeu 
 
-Je ne comprend pas pourquoi quand on est sur l'arbre de comaptéance les gold sont gagné beaucoup plus vite ?
+j'ai joint un fichier .vdf qui montre l'exemple (avec baucoup plus de langue que nous)
 
-Quand on rate un jet de dés mais pas trop loin du score a atteindre ce serait mieux qu'on arrive un peut avant la zone cible mais par contre pas alligné comme si il y avais eu un décalage 
-
-Le système de dés c'est bien mieux qu'avant je me retrouve globalement a changé de dés pour l'approche mais globalement j'utilise toujour principalement le d6 pour faire de la précision (ce qui est super) puis le plus gros dés disponible pour le reste, la raison principal est que par exemple en mode enfer utiliseer le d10 c'est jamais bien car certe un peut plus loin que le d6 et plus précis que le d30 mais le chance de réussite a cause du seuille de difficulté sont telle que au final il faut toujour faire 10 donc presque un critique pour réussire , je n'ai pas la solution encore a cette équilibrage, même si le jeu est déjà bien plus fun maintenant
-
-pour le mode enfer infini c'est bien mais globalement j'ai fait 3 troue d'affilié c'est amusant mais je vois bien que c'est tout le temps la même chose pas vraiment de difference avec juste acheter un terrain infernal et le joueur , pour le mode infini j'avais bien plus imaginé quelque chose qui change beaucoup par exemple un terrain avec un définilement "infinie" vers la gauche et le but est d'aller le plus loin possible 
-
+autre sujet ce serait bien de pouvoir deployer sur steam directement 
+on as deja une pipe CI pour carnaval marbles github je te me le build.yml de l'autre jeu comme base mais nous on veux pas de build mac donc que pc et linux 
