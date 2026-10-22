@@ -1,0 +1,21 @@
+Retour tous au nid
+
+Quand on roule en boulle avec les item les item sont plus collé a l'herision ils sont comme en lévitation autour ce qui eest étrange 
+
+on pourrais ajouter un minimum de couleur au hersion plustot que tout gris et blanc 
+
+j'ai essayer de costuire prés du roché mais j'ai été vite bloqué car les construction n'estais pas possible car trop proche de roché c'est gainant comme dans valheim il faudrais que ça puissent rentré dans le roché c'est pas grave et ça permet de mieux épousé la forme de l'environmement
+
+Il faudrais que la caméré soit moins lock qu'on puisent plus facilement tourné visuellement tour du perso dans tout les axe 
+
+ce serait bien d'avoir une vue fps activable 
+
+même si la pluie ne dure que peut de t emps ça reste un temps mort ou on as peut de chsoe a faire surtout au débug si on as une maison toute petite
+
+quelle est l'impacte rééle de la pluie sur le joueur ? 
+
+les elements de texte prenne trop de place sur l'écran et sont très centré surtout l'indication avant pluie cela deconcentre beaucoup et empeche souvent de ce concentrer sur l'exploration et le herission
+
+
+ce serait bien d'avoir un plus grand environoement , avec des dangé , d'autre petit animaux , souris , écureuill , et même des ennemie , renard , chat , ourse , oiseau 
+
